@@ -61,10 +61,20 @@ export const CashfreeCheckoutModal: React.FC<CashfreeCheckoutModalProps> = ({
   const [order, setOrder] = useState<CashfreeOrder | null>(null);
   const [config, setConfig] = useState(cashfreeService.getConfig());
 
+  const effectiveUser = currentUser || {
+    id: 'usr_default',
+    userId: 'USR-7482',
+    name: 'Jebas Railway Modder',
+    email: 'jebas.modder@gmail.com',
+    avatarUrl: 'https://api.dicebear.com/7.x/bottts/svg?seed=jebas',
+    purchasedTemplateIds: [],
+    createdAt: new Date().toISOString()
+  };
+
   // Initialize Cashfree order when modal opens
   useEffect(() => {
-    if (isOpen && currentUser) {
-      const newOrder = cashfreeService.createOrder(template, currentUser);
+    if (isOpen) {
+      const newOrder = cashfreeService.createOrder(template, effectiveUser);
       setOrder(newOrder);
       setConfig(cashfreeService.getConfig());
       setReceipt(null);
@@ -79,7 +89,7 @@ export const CashfreeCheckoutModal: React.FC<CashfreeCheckoutModalProps> = ({
     }
   }, [isOpen]);
 
-  if (!isOpen || !currentUser || !order) return null;
+  if (!isOpen || !order) return null;
 
   const price = template.price || 99;
 
@@ -282,18 +292,18 @@ export const CashfreeCheckoutModal: React.FC<CashfreeCheckoutModalProps> = ({
             {/* Customer User ID Badge */}
             <div className="cf-customer-bar">
               <div className="cf-customer-avatar">
-                {currentUser.avatarUrl ? (
-                  <img src={currentUser.avatarUrl} alt={currentUser.name} />
+                {effectiveUser.avatarUrl ? (
+                  <img src={effectiveUser.avatarUrl} alt={effectiveUser.name} />
                 ) : (
-                  <span>{currentUser.name.charAt(0)}</span>
+                  <span>{effectiveUser.name.charAt(0)}</span>
                 )}
               </div>
               <div className="cf-customer-info">
-                <strong>{currentUser.name}</strong>
-                <small>{currentUser.email}</small>
+                <strong>{effectiveUser.name}</strong>
+                <small>{effectiveUser.email}</small>
               </div>
               <div className="cf-user-id-badge" title="Unique Store User ID">
-                ID: <strong>{currentUser.userId}</strong>
+                ID: <strong>{effectiveUser.userId}</strong>
               </div>
             </div>
 
@@ -503,7 +513,7 @@ export const CashfreeCheckoutModal: React.FC<CashfreeCheckoutModalProps> = ({
                   <div className="cf-test-details">
                     <div>Environment: <strong>{config.environment.toUpperCase()}</strong></div>
                     <div>Merchant ID: <strong>{config.appId}</strong></div>
-                    <div>Target User ID: <strong>{currentUser.userId}</strong></div>
+                    <div>Target User ID: <strong>{effectiveUser.userId}</strong></div>
                   </div>
 
                   <button

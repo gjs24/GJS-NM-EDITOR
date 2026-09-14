@@ -246,10 +246,6 @@ export const PurchaseTemplateModal: React.FC<PurchaseTemplateModalProps> = ({
                   type="button"
                   className="btn-pay-cashfree-main"
                   onClick={() => {
-                    if (!currentUser) {
-                      setShowGoogleModal(true);
-                      return;
-                    }
                     setShowCashfreeModal(true);
                   }}
                 >
