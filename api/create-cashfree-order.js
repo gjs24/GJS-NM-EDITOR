@@ -1,5 +1,7 @@
 // Vercel Serverless Function: POST /api/create-cashfree-order
 // Securely generates Cashfree order token using server-side credentials
+import { getDb } from './db.js';
+
 export default async function handler(req, res) {
   // CORS Headers
   res.setHeader('Access-Control-Allow-Credentials', 'true');
@@ -65,10 +67,27 @@ export default async function handler(req, res) {
     });
 
     const data = await response.json();
+
+    // Log to Neon PostgreSQL if connected
+    const sql = getDb();
+    if (sql) {
+      sql`
+        INSERT INTO cashfree_logs (
+          order_id, customer_id, customer_email, amount, status, payload
+        ) VALUES (
+          ${orderId},
+          ${customerDetails?.customerId || null},
+          ${customerDetails?.customerEmail || null},
+          ${Number(orderAmount)},
+          ${response.ok ? 'ORDER_CREATED' : 'CREATION_FAILED'},
+          ${JSON.stringify(data)}
+        )
+      `.catch(() => {});
+    }
+
     return res.status(response.status).json(data);
   } catch (error) {
     console.error('Serverless Cashfree order creation error:', error);
     return res.status(500).json({ error: 'Failed to create Cashfree order', details: error.message });
   }
 }
-
