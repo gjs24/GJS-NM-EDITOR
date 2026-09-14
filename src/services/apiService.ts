@@ -24,7 +24,7 @@ export const apiService = {
   },
 
   /**
-   * Fetch templates from Neon PostgreSQL (via Vercel or Render backend)
+   * Fetch templates from Cloud / Neon PostgreSQL with robust local merge
    */
   async getPublishedTemplates(): Promise<BoardTemplate[]> {
     const url = getApiUrl('/api/templates');
@@ -34,8 +34,8 @@ export const apiService = {
         if (res.ok) {
           const cloudTemplates: BoardTemplate[] = await res.json();
           if (Array.isArray(cloudTemplates) && cloudTemplates.length > 0) {
-            storageService.saveAllTemplates(cloudTemplates);
-            return cloudTemplates;
+            const merged = this.mergeWithLocalTemplates(cloudTemplates);
+            return merged.filter((t) => t.published !== false);
           }
         }
       } catch (err) {
@@ -56,8 +56,7 @@ export const apiService = {
         if (res.ok) {
           const cloudTemplates: BoardTemplate[] = await res.json();
           if (Array.isArray(cloudTemplates) && cloudTemplates.length > 0) {
-            storageService.saveAllTemplates(cloudTemplates);
-            return cloudTemplates;
+            return this.mergeWithLocalTemplates(cloudTemplates);
           }
         }
       } catch (err) {
@@ -65,6 +64,33 @@ export const apiService = {
       }
     }
     return storageService.getAllTemplates();
+  },
+
+  /**
+   * Helper to merge cloud templates with local changes so local edits are never lost
+   */
+  mergeWithLocalTemplates(cloudTemplates: BoardTemplate[]): BoardTemplate[] {
+    const local = storageService.getAllTemplates();
+    const localMap = new Map(local.map((t) => [t.id, t]));
+
+    const merged: BoardTemplate[] = cloudTemplates.map((cloud) => {
+      const loc = localMap.get(cloud.id);
+      if (!loc) return cloud;
+      localMap.delete(cloud.id);
+
+      // Keep whichever version was updated more recently
+      const locTime = new Date(loc.updatedAt || 0).getTime();
+      const cloudTime = new Date(cloud.updatedAt || 0).getTime();
+      return locTime > cloudTime ? loc : cloud;
+    });
+
+    // Keep any locally created templates that are not yet on the cloud
+    for (const remainingLocal of localMap.values()) {
+      merged.push(remainingLocal);
+    }
+
+    storageService.saveAllTemplates(merged);
+    return merged;
   },
 
   /**

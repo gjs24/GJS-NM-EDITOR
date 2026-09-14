@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { storageService } from './services/storageService';
+import { apiService } from './services/apiService';
 import { BoardTemplate } from './types/template';
 import { Navbar } from './components/layout/Navbar';
 import { HomePage } from './components/home/HomePage';
@@ -23,11 +24,11 @@ const MainApp: React.FC = () => {
   const [isHelpOpen, setIsHelpOpen] = useState(false);
   const [savedCount, setSavedCount] = useState<number>(0);
 
-  // Load templates on initial mount
+  // Load templates on mount and whenever switching views
   useEffect(() => {
     loadTemplates();
     updateSavedCount();
-  }, []);
+  }, [isAdmin, viewMode]);
 
   const updateSavedCount = () => {
     try {
@@ -38,24 +39,43 @@ const MainApp: React.FC = () => {
     }
   };
 
-  const loadTemplates = () => {
-    const all = storageService.getAllTemplates();
-    setTemplates(all);
-    if (!activeTemplate && all.length > 0) {
-      const firstPublished = all.find((t) => t.published) || all[0];
-      setActiveTemplate(firstPublished);
+  const loadTemplates = async () => {
+    // 1. Immediately load local templates
+    const local = storageService.getAllTemplates();
+    if (local.length > 0) {
+      setTemplates(local);
+      if (!activeTemplate) {
+        const first = local.find((t) => t.published !== false) || local[0];
+        setActiveTemplate(first);
+      }
     }
+    // 2. Fetch and merge cloud templates in background
+    try {
+      const cloud = await apiService.getAllTemplates();
+      if (cloud && cloud.length > 0) {
+        setTemplates(cloud);
+        if (!activeTemplate) {
+          const first = cloud.find((t) => t.published !== false) || cloud[0];
+          setActiveTemplate(first);
+        }
+      }
+    } catch {}
   };
 
   // Save/Publish template handler (Admin)
-  const handleSaveTemplate = (updated: BoardTemplate) => {
+  const handleSaveTemplate = async (updated: BoardTemplate) => {
     const saved = storageService.saveTemplate(updated);
     setTemplates(storageService.getAllTemplates());
     setActiveTemplate(saved);
+    try {
+      await apiService.saveTemplate(saved);
+    } catch (e) {
+      console.warn('Cloud template sync skipped:', e);
+    }
   };
 
   // Delete template handler (Admin)
-  const handleDeleteTemplate = (id: string) => {
+  const handleDeleteTemplate = async (id: string) => {
     storageService.deleteTemplate(id);
     const refreshed = storageService.getAllTemplates();
     setTemplates(refreshed);
@@ -64,10 +84,15 @@ const MainApp: React.FC = () => {
     } else if (activeTemplate?.id === id) {
       setActiveTemplate(refreshed[0]);
     }
+    try {
+      await apiService.deleteTemplate(id);
+    } catch (e) {
+      console.warn('Cloud template delete skipped:', e);
+    }
   };
 
   // Create new template handler (Admin)
-  const handleCreateNewTemplate = () => {
+  const handleCreateNewTemplate = async () => {
     const newTemplate: BoardTemplate = {
       id: 'template_' + Date.now(),
       name: 'New Custom LED Texture (1024×1024)',
@@ -127,7 +152,10 @@ const MainApp: React.FC = () => {
           isDotMatrix: true
         }
       ],
-      published: false,
+      published: true, // Visible to users on site by default
+      isPaid: false,
+      price: 0,
+      currency: 'INR',
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
       author: 'Admin'
@@ -136,6 +164,11 @@ const MainApp: React.FC = () => {
     storageService.saveTemplate(newTemplate);
     setTemplates(storageService.getAllTemplates());
     setActiveTemplate(newTemplate);
+    try {
+      await apiService.saveTemplate(newTemplate);
+    } catch (e) {
+      console.warn('Cloud save new template notice:', e);
+    }
   };
 
   // Published templates only for user mode

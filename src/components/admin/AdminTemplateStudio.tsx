@@ -2,6 +2,8 @@ import React, { useState, useRef } from 'react';
 import { BoardTemplate, EditableField, BoardCategory } from '../../types/template';
 import { BoardCanvas } from '../board/BoardCanvas';
 import { AdminCashfreeSettingsModal } from './AdminCashfreeSettingsModal';
+import { CustomFontModal } from '../common/CustomFontModal';
+import { fontManager } from '../../utils/fontManager';
 import {
   Plus,
   Trash2,
@@ -50,6 +52,7 @@ export const AdminTemplateStudio: React.FC<AdminTemplateStudioProps> = ({
 }) => {
   const [template, setTemplate] = useState<BoardTemplate>(activeTemplate);
   const [showCashfreeSettings, setShowCashfreeSettings] = useState<boolean>(false);
+  const [showCustomFontModal, setShowCustomFontModal] = useState<boolean>(false);
   const [selectedFieldId, setSelectedFieldId] = useState<string | null>(
     activeTemplate.fields[0]?.id || null
   );
@@ -84,7 +87,8 @@ export const AdminTemplateStudio: React.FC<AdminTemplateStudioProps> = ({
 
   const updateTemplate = (updates: Partial<BoardTemplate>) => {
     setTemplate((prev) => {
-      const next = { ...prev, ...updates };
+      const next = { ...prev, ...updates, updatedAt: new Date().toISOString() };
+      onSaveTemplate(next);
       return next;
     });
   };
@@ -335,16 +339,7 @@ export const AdminTemplateStudio: React.FC<AdminTemplateStudioProps> = ({
     return acc;
   }, {});
 
-  const fontOptions = [
-    { label: 'VT323 (Authentic LED Matrix)', value: "'VT323', 'DotGothic16', monospace" },
-    { label: 'DotGothic16 (LED Dot Font)', value: "'DotGothic16', monospace" },
-    { label: 'Share Tech Mono (Digital Monospace)', value: "'Share Tech Mono', monospace" },
-    { label: 'Chakra Petch (Futuristic / High-Tech)', value: "'Chakra Petch', sans-serif" },
-    { label: 'Arial Black (Heavy Railway)', value: 'Arial Black, sans-serif' },
-    { label: 'Roboto Condensed (Classic Board)', value: "'Roboto Condensed', Arial, sans-serif" },
-    { label: 'Nirmala UI (Hindi / Indian Scripts)', value: "'Nirmala UI', Mangal, Arial" },
-    { label: 'Impact (Heavy Bold)', value: 'Impact, sans-serif' }
-  ];
+  const fontOptions = fontManager.getAllFontOptions();
 
   return (
     <div className="admin-studio-container">
@@ -923,7 +918,28 @@ export const AdminTemplateStudio: React.FC<AdminTemplateStudioProps> = ({
                     </div>
 
                     <div className="prop-row">
-                      <label>Font Style:</label>
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 4 }}>
+                        <label style={{ margin: 0 }}>Font Style:</label>
+                        <button
+                          type="button"
+                          onClick={() => setShowCustomFontModal(true)}
+                          style={{
+                            background: 'rgba(255,159,28,0.15)',
+                            border: '1px solid rgba(255,159,28,0.35)',
+                            color: 'var(--rail-yellow)',
+                            borderRadius: 4,
+                            padding: '2px 8px',
+                            fontSize: 11,
+                            fontWeight: 700,
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: 4
+                          }}
+                        >
+                          <Plus size={11} /> Add Custom Font
+                        </button>
+                      </div>
                       <select
                         value={currentField.fontFamily}
                         onChange={(e) => handleUpdateSelectedField({ fontFamily: e.target.value })}
@@ -1557,6 +1573,17 @@ export const AdminTemplateStudio: React.FC<AdminTemplateStudioProps> = ({
       <AdminCashfreeSettingsModal
         isOpen={showCashfreeSettings}
         onClose={() => setShowCashfreeSettings(false)}
+      />
+
+      {/* Custom Railway Font Manager Modal */}
+      <CustomFontModal
+        isOpen={showCustomFontModal}
+        onClose={() => setShowCustomFontModal(false)}
+        onFontAdded={(fontVal) => {
+          if (selectedFieldId) {
+            handleUpdateSelectedField({ fontFamily: fontVal });
+          }
+        }}
       />
     </div>
   );
