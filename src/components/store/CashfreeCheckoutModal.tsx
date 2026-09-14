@@ -145,8 +145,14 @@ export const CashfreeCheckoutModal: React.FC<CashfreeCheckoutModalProps> = ({
       setProcessingStep('Verifying payment confirmation with bank...');
       const finalReceipt = await cashfreeService.processPayment(order, paymentMode, details);
 
-      // Permanently unlock template in user profile & guest storage
-      unlockTemplateForUser(template.id);
+      // Permanently unlock template in user profile & Neon PostgreSQL
+      unlockTemplateForUser(
+        template.id,
+        finalReceipt.orderId,
+        finalReceipt.referenceId,
+        finalReceipt.amount,
+        finalReceipt.paymentMode
+      );
 
       setReceipt(finalReceipt);
       setIsProcessing(false);

@@ -6,6 +6,21 @@
 -- 2. Select your Project -> Click "SQL Editor" on the left menu
 -- 3. Paste this script and click "Run" (or Ctrl+Enter)
 
+-- 0. Create Users Table (Permanent Railway Account, User ID, Profile)
+CREATE TABLE IF NOT EXISTS users (
+    id TEXT PRIMARY KEY,
+    user_id TEXT UNIQUE NOT NULL,
+    name TEXT NOT NULL,
+    email TEXT UNIQUE NOT NULL,
+    password_hash TEXT,
+    avatar_url TEXT,
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
+CREATE INDEX IF NOT EXISTS idx_users_user_id ON users(user_id);
+
 -- 1. Create Templates Table
 CREATE TABLE IF NOT EXISTS templates (
     id TEXT PRIMARY KEY,

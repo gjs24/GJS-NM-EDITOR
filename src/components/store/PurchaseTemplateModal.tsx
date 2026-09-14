@@ -156,15 +156,15 @@ export const PurchaseTemplateModal: React.FC<PurchaseTemplateModalProps> = ({
               ) : (
                 <div className="user-connect-prompt">
                   <div className="prompt-text">
-                    <strong>Google Account Required</strong>
-                    <small>Sign in with Google to bind this template to your User ID.</small>
+                    <strong>Railway Account Required</strong>
+                    <small>Sign in or create an account to link purchases to your permanent User ID.</small>
                   </div>
                   <button
                     type="button"
                     className="btn-google-connect"
                     onClick={() => setShowGoogleModal(true)}
                   >
-                    Sign in with Google
+                    Sign In / Register
                   </button>
                 </div>
               )}
@@ -246,6 +246,10 @@ export const PurchaseTemplateModal: React.FC<PurchaseTemplateModalProps> = ({
                   type="button"
                   className="btn-pay-cashfree-main"
                   onClick={() => {
+                    if (!currentUser) {
+                      setShowGoogleModal(true);
+                      return;
+                    }
                     setShowCashfreeModal(true);
                   }}
                 >
@@ -257,7 +261,13 @@ export const PurchaseTemplateModal: React.FC<PurchaseTemplateModalProps> = ({
                 <button
                   type="button"
                   className="btn-pay-unlock"
-                  onClick={handleCompletePurchase}
+                  onClick={() => {
+                    if (!currentUser) {
+                      setShowGoogleModal(true);
+                      return;
+                    }
+                    handleCompletePurchase();
+                  }}
                   disabled={isProcessing}
                 >
                   {isProcessing ? (

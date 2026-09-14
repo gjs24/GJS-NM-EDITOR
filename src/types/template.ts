@@ -111,11 +111,15 @@ export interface SavedUserBoard {
 }
 
 export interface GoogleUserProfile {
-  id: string; // Google account unique ID
+  id: string; // Account unique ID
   userId: string; // User ID like USR-7482
-  name: string; // User display name
-  email: string; // User Google email
+  name: string; // User display name / Full Name
+  username?: string; // Optional username handle
+  email: string; // User email
+  phone?: string; // Optional customer contact phone
   avatarUrl?: string; // Profile picture URL or fallback
   purchasedTemplateIds: string[]; // List of template IDs user has purchased / unlocked
   createdAt: string;
 }
+
+export type UserProfile = GoogleUserProfile;
