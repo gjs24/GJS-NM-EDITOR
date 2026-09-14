@@ -77,3 +77,4 @@ graph LR
    - You will see the new template saved inside your Neon PostgreSQL `templates` table!
 5. When a user buys a template via Cashfree:
    - The purchase is saved directly in the `user_purchases` table and synced across all their devices!
+
