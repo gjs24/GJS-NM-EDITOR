@@ -1,0 +1,14 @@
+version: '3.8'
+
+services:
+  gjs-railway-studio:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: gjs_railway_studio_prod
+    restart: always
+    ports:
+      - "80:80"
+    environment:
+      - NODE_ENV=production
+

@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <defs>
+    <linearGradient id="boardGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0b192c" />
+      <stop offset="100%" stop-color="#050c17" />
+    </linearGradient>
+    <linearGradient id="ledGlow" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#00b4d8" />
+      <stop offset="50%" stop-color="#90e0ef" />
+      <stop offset="100%" stop-color="#00b4d8" />
+    </linearGradient>
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="1.5" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+  </defs>
+
+  <!-- Outer Board Frame -->
+  <rect x="2" y="6" width="60" height="52" rx="8" fill="url(#boardGrad)" stroke="#00b4d8" stroke-width="2.5" />
+
+  <!-- Inner Display Inset -->
+  <rect x="7" y="11" width="50" height="42" rx="4" fill="#000000" stroke="#0077b6" stroke-width="1.2" />
+
+  <!-- Corner Rivet Bolts -->
+  <circle cx="5.5" cy="9.5" r="1.5" fill="#48cae4" />
+  <circle cx="58.5" cy="9.5" r="1.5" fill="#48cae4" />
+  <circle cx="5.5" cy="54.5" r="1.5" fill="#48cae4" />
+  <circle cx="58.5" cy="54.5" r="1.5" fill="#48cae4" />
+
+  <!-- LED Grid Lines / Train Silhouette -->
+  <!-- Top LED Line: Train Number -->
+  <rect x="12" y="16" width="40" height="4" rx="2" fill="url(#ledGlow)" filter="url(#glow)" />
+  
+  <!-- Middle LED Grid Dots: Station Name -->
+  <rect x="12" y="24" width="28" height="5" rx="2" fill="#ffb703" />
+  <rect x="43" y="24" width="9" height="5" rx="2" fill="#fb8500" />
+
+  <!-- Bottom LED Matrix: Bilingual Subtitle -->
+  <rect x="12" y="33" width="34" height="4" rx="1.5" fill="#90e0ef" />
+  <circle cx="50" cy="35" r="2" fill="#00b4d8" />
+
+  <!-- Status Indicator LED -->
+  <circle cx="14" cy="45" r="2.5" fill="#22c55e" filter="url(#glow)" />
+  <rect x="20" y="44" width="32" height="2" rx="1" fill="#334155" />
+</svg>
