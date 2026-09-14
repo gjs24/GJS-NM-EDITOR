@@ -56,7 +56,7 @@ export const AdminLoginModal: React.FC = () => {
               id="admin-pass-input"
               type="password"
               autoFocus
-              placeholder="Enter passcode (default: admin123)"
+              placeholder="Enter administrator passcode"
               value={passcode}
               onChange={(e) => {
                 setPasscode(e.target.value);
@@ -71,11 +71,6 @@ export const AdminLoginModal: React.FC = () => {
               <span>{error}</span>
             </div>
           )}
-
-          <div className="modal-hint">
-            <Lock size={12} />
-            <span>Default passcode for setup: <code>admin123</code></span>
-          </div>
 
           <div className="modal-actions">
             <button

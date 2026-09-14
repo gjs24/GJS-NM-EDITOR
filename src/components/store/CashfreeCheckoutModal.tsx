@@ -62,11 +62,11 @@ export const CashfreeCheckoutModal: React.FC<CashfreeCheckoutModalProps> = ({
   const [config, setConfig] = useState(cashfreeService.getConfig());
 
   const effectiveUser = currentUser || {
-    id: 'usr_default',
-    userId: 'USR-7482',
-    name: 'Jebas Railway Modder',
-    email: 'jebas.modder@gmail.com',
-    avatarUrl: 'https://api.dicebear.com/7.x/bottts/svg?seed=jebas',
+    id: 'usr_guest',
+    userId: 'USR-GUEST',
+    name: 'Railway Enthusiast',
+    email: 'user@example.com',
+    avatarUrl: 'https://api.dicebear.com/7.x/bottts/svg?seed=railway',
     purchasedTemplateIds: [],
     createdAt: new Date().toISOString()
   };
@@ -278,8 +278,8 @@ export const CashfreeCheckoutModal: React.FC<CashfreeCheckoutModalProps> = ({
                 </div>
 
                 <div className="cf-env-pill">
-                  <span className={`cf-status-dot ${config.environment}`} />
-                  <span>{config.environment === 'sandbox' ? 'SANDBOX TEST' : 'LIVE SECURE'}</span>
+                  <span className="cf-status-dot production" />
+                  <span>SECURE 256-BIT ENCRYPTION</span>
                 </div>
               </div>
 

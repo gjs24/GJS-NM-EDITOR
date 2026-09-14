@@ -185,8 +185,8 @@ export const PurchaseTemplateModal: React.FC<PurchaseTemplateModalProps> = ({
 
             {/* Payment Method Selector */}
             <div className="payment-methods-box">
-              <label className="section-label">Select Payment Gateway / Method:</label>
-              <div className="payment-options-grid">
+              <label className="section-label">Payment Gateway:</label>
+              <div className="payment-options-grid" style={{ gridTemplateColumns: 'repeat(2, 1fr)' }}>
                 <button
                   type="button"
                   className={`payment-option-card ${paymentMethod === 'cashfree' ? 'active cf-active-option' : ''}`}
@@ -204,16 +204,7 @@ export const PurchaseTemplateModal: React.FC<PurchaseTemplateModalProps> = ({
                   onClick={() => setPaymentMethod('upi')}
                 >
                   <Smartphone size={18} />
-                  <span>Direct UPI App</span>
-                </button>
-
-                <button
-                  type="button"
-                  className={`payment-option-card ${paymentMethod === 'test' ? 'active' : ''}`}
-                  onClick={() => setPaymentMethod('test')}
-                >
-                  <Zap size={18} />
-                  <span>1-Click Instant Unlock</span>
+                  <span>Google Pay / PhonePe / UPI</span>
                 </button>
               </div>
             </div>
@@ -241,51 +232,26 @@ export const PurchaseTemplateModal: React.FC<PurchaseTemplateModalProps> = ({
                 <strong>₹{price}</strong>
               </div>
 
-              {paymentMethod === 'cashfree' ? (
-                <button
-                  type="button"
-                  className="btn-pay-cashfree-main"
-                  onClick={() => {
-                    if (!currentUser) {
-                      setShowGoogleModal(true);
-                      return;
-                    }
-                    setShowCashfreeModal(true);
-                  }}
-                >
-                  <Zap size={16} />
-                  <span>Pay ₹{price} via Cashfree</span>
-                  <ArrowRight size={16} />
-                </button>
-              ) : (
-                <button
-                  type="button"
-                  className="btn-pay-unlock"
-                  onClick={() => {
-                    if (!currentUser) {
-                      setShowGoogleModal(true);
-                      return;
-                    }
-                    handleCompletePurchase();
-                  }}
-                  disabled={isProcessing}
-                >
-                  {isProcessing ? (
-                    <span>Processing Payment...</span>
-                  ) : (
-                    <>
-                      <Zap size={15} />
-                      <span>Pay ₹{price} & Unlock Template</span>
-                      <ArrowRight size={15} />
-                    </>
-                  )}
-                </button>
-              )}
+              <button
+                type="button"
+                className="btn-pay-cashfree-main"
+                onClick={() => {
+                  if (!currentUser) {
+                    setShowGoogleModal(true);
+                    return;
+                  }
+                  setShowCashfreeModal(true);
+                }}
+              >
+                <Zap size={16} />
+                <span>Pay ₹{price} via Cashfree</span>
+                <ArrowRight size={16} />
+              </button>
             </div>
 
             <div className="checkout-security-notice">
               <ShieldCheck size={13} />
-              <span>RBI Authorized Payment Gateway · Instant Unlock for {currentUser?.userId || 'Guest'}</span>
+              <span>Official Payment Gateway · Instant Unlock for {currentUser?.name || 'Verified User'} ({currentUser?.userId || 'USR-PENDING'})</span>
             </div>
           </>
         )}

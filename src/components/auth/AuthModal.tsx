@@ -9,7 +9,6 @@ import {
   User,
   Eye,
   EyeOff,
-  Sparkles,
   ArrowRight,
   Check,
   AlertCircle
@@ -20,7 +19,6 @@ export const AuthModal: React.FC = () => {
     showGoogleModal,
     setShowGoogleModal,
     authModalTab,
-    setAuthModalTab,
     loginUser,
     registerUser,
     loginWithGoogle,
@@ -30,17 +28,21 @@ export const AuthModal: React.FC = () => {
   // Active tab: 'login' | 'register'
   const [tab, setTab] = useState<AuthModalTab>(authModalTab || 'login');
 
-  // Sign In state
-  const [loginIdentifier, setLoginIdentifier] = useState('jebas.modder@gmail.com');
-  const [loginPassword, setLoginPassword] = useState('modder123');
+  // Sign In state (clean, empty defaults for any user)
+  const [loginIdentifier, setLoginIdentifier] = useState('');
+  const [loginPassword, setLoginPassword] = useState('');
   const [showLoginPwd, setShowLoginPwd] = useState(false);
 
-  // Register state
+  // Register state (clean, empty defaults for any user)
   const [regName, setRegName] = useState('');
   const [regEmail, setRegEmail] = useState('');
   const [regPassword, setRegPassword] = useState('');
   const [regConfirmPassword, setRegConfirmPassword] = useState('');
   const [showRegPwd, setShowRegPwd] = useState(false);
+
+  // Google sign in state
+  const [showGoogleInput, setShowGoogleInput] = useState(false);
+  const [googleEmail, setGoogleEmail] = useState('');
 
   // Feedback states
   const [loading, setLoading] = useState(false);
@@ -113,14 +115,27 @@ export const AuthModal: React.FC = () => {
     }
   };
 
-  // Quick 1-Click Demo Users for rapid testing
-  const handleQuickDemo = async (demoName: string, demoEmail: string) => {
-    setLoading(true);
+  // Handle Google Sign In
+  const handleGoogleAction = async () => {
     setErrorMsg('');
+    setSuccessMsg('');
+
+    // Check if user already typed an email into any field
+    const candidate = googleEmail.trim() || (loginIdentifier.includes('@') ? loginIdentifier.trim() : '') || regEmail.trim();
+
+    if (!candidate || !candidate.includes('@')) {
+      setShowGoogleInput(true);
+      setErrorMsg('Please enter your Google account email below to continue.');
+      return;
+    }
+
+    setLoading(true);
     try {
-      await loginWithGoogle(demoEmail, demoName);
-    } catch {
-      // Handled inside
+      const userName = regName.trim() || candidate.split('@')[0];
+      await loginWithGoogle(candidate, userName);
+      setSuccessMsg('Signed in with Google successfully!');
+    } catch (err: any) {
+      setErrorMsg(err.message || 'Google Sign-In could not be completed.');
     } finally {
       setLoading(false);
     }
@@ -146,7 +161,7 @@ export const AuthModal: React.FC = () => {
           </div>
           <h2 className="auth-title">Railway Modder Account</h2>
           <p className="auth-subtitle">
-            Sign in or create an account to bind your <strong>User ID</strong>, unlock texture sheet templates, and save creations into <strong>My Store</strong>.
+            Sign in or create an account to get your permanent <strong>User ID</strong>, unlock simulator textures, and save boards into <strong>My Store</strong>.
           </p>
         </div>
 
@@ -204,7 +219,8 @@ export const AuthModal: React.FC = () => {
                 <input
                   type="text"
                   required
-                  placeholder="name@example.com or USR-7482"
+                  autoFocus
+                  placeholder="your.email@example.com or USR-XXXX"
                   value={loginIdentifier}
                   onChange={(e) => setLoginIdentifier(e.target.value)}
                   className="auth-input"
@@ -254,7 +270,8 @@ export const AuthModal: React.FC = () => {
                 <input
                   type="text"
                   required
-                  placeholder="e.g. Jebas Railway Modder"
+                  autoFocus
+                  placeholder="Your Name or Modder Handle"
                   value={regName}
                   onChange={(e) => setRegName(e.target.value)}
                   className="auth-input"
@@ -322,7 +339,7 @@ export const AuthModal: React.FC = () => {
               <UserCheck size={14} />
               <span>
                 Permanent User ID badge will be assigned:{' '}
-                <strong>{currentUser?.userId || 'USR-XXXX'}</strong>
+                <strong>USR-XXXX (Auto-generated on signup)</strong>
               </span>
             </div>
 
@@ -340,11 +357,29 @@ export const AuthModal: React.FC = () => {
           <span />
         </div>
 
+        {/* Google Email Input (if needed) */}
+        {showGoogleInput && (
+          <div className="auth-field-group" style={{ animation: 'fadeIn 0.2s ease' }}>
+            <label>Google Account Email</label>
+            <div className="auth-input-container">
+              <Mail className="field-icon" size={15} />
+              <input
+                type="email"
+                placeholder="yourname@gmail.com"
+                value={googleEmail}
+                onChange={(e) => setGoogleEmail(e.target.value)}
+                className="auth-input"
+                autoFocus
+              />
+            </div>
+          </div>
+        )}
+
         {/* 1-Click Google Sign-In */}
         <button
           type="button"
           className="btn-google-auth"
-          onClick={() => handleQuickDemo('Jebas Railway Modder', 'jebas.modder@gmail.com')}
+          onClick={handleGoogleAction}
           disabled={loading}
         >
           <svg viewBox="0 0 48 48" width="18" height="18">
@@ -356,31 +391,10 @@ export const AuthModal: React.FC = () => {
           <span>Continue with Google</span>
         </button>
 
-        {/* Quick Testing User Profiles */}
-        <div className="auth-quick-accounts">
-          <span className="auth-quick-accounts-label">Instant 1-Click Login:</span>
-          <div className="auth-quick-pills">
-            <button
-              type="button"
-              className="auth-pill-btn"
-              onClick={() => handleQuickDemo('Jebas Railway Modder', 'jebas.modder@gmail.com')}
-            >
-              Jebas (Primary)
-            </button>
-            <button
-              type="button"
-              className="auth-pill-btn"
-              onClick={() => handleQuickDemo('Trainz Enthusiast', 'trainz.fan@gmail.com')}
-            >
-              Trainz Enthusiast
-            </button>
-          </div>
-        </div>
-
         {/* Security Seal */}
         <div className="auth-footer-security">
           <ShieldCheck size={13} />
-          <span>Neon PostgreSQL Protected · Synchronizes Purchases Across Devices</span>
+          <span>Official GJS Railway Studio · Secure Cloud Synchronized</span>
         </div>
       </div>
     </div>
